@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="Hugo 0.82.0" />
+
+  <title> 华为软挑2021 |  Hugo</title>
+  <meta name="description" content="A simple and concise hugo theme.">
+  <link rel="stylesheet" href="http://example.org/css/simpleness.css">
+  <link rel="canonical" href="http://example.org/posts/hw/">
+  <link rel="alternate" type="application/rss+xml" href="" title="Hugo">
+  
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <header class="menus">
+  
+
+  <nav >
+    
+    <a href="/"> Home</a>
+    
+    <a href="/about/"> About</a>
+    
+  </nav>
+
+  <nav class="fontawesome">
+    
+    <a href="https://github.com/RainerChiang" target="_blank">
+        <i title="GitHub" class="fab fa-github"></i>
+    </a>
+    
+    
+    <a href="http://example.org/index.xml" target="_blank">
+        <i title="RSS" class="fas fa-rss"></i>
+    </a>
+    
+  </nav>
+  
+  
+  <div class="hidden description">A simple and concise hugo theme.</div>
+  
+</header>
+
+<article class="article">
+  <header>
+    <h1 style="text-align: center;" >华为软挑2021</h1>
+
+    <div class="post-meta">
+    
+      <time datetime="2021-04-13T09:16:39&#43;08:00">April 13, 2021</time> &nbsp; 
+    
+
+     &nbsp;
+
+    
+    
+    
+
+    
+      <i class="far fa-clock"></i>
+      
+      
+      
+
+      
+        11 min
+      
+      20 s
+      &nbsp;
+    
+
+    
+    </div>
+  </header>
+
+   
+
+  <div class="text">
+    <p>华为2021软件挑战正式赛在都江堰青城山尊酒店落下帷幕，stopAc最后取得了成渝赛区第八名的成绩。每个赛区的前四名才有资格去深圳进行全球总决赛，这也意味着我们的比赛之旅到此就结束了。虽然没能进总决赛，但我们的目标(赛区前10)还是实现了，也算是不错的结局吧！</p>
+<p>这场比赛其实对我来说意义蛮大的。第一次写了超500行的代码，第一次在比赛中贡献了两个有效的优化点，第一次拿了这么好的名次，学生生涯最后一场比赛，第一次体会到全力以赴的快感，第一次觉得自己还行哈哈。</p>
+<p>真的很感谢两位超给力的队友，我也只想说一句达神yyds，裕神yyds！一个算法能力、学习能力、理解能力超强。一个代码能力、逻辑能力无敌。马上就要分别了，真的很期待下次还可以一起并肩作战，如果有这样的机会的话。</p>
+<p>感慨完毕，说一下这次的比赛吧。</p>
+<p>题目的背景是你是一家提供云服务的厂商，在满足用户需求的情况下，从购买和使用两个方面最大程度的节约成本。首先会给出可以购买的所有服务器，作为承载虚拟机的容器，每个服务器都有不同的cpu和ram,以及购买成本和使用成本。使用成本即服务器满载一天所消耗的电力成本。之后会给出用户可能请求的所有虚拟机类型，每个虚拟机都有不同的cpu和ram。除此之外，每个虚拟机还定义了其单、双节点部署类型。每个服务器都有A、B两个节点，每个节点的资源相同。单节点虚拟机可以任意部署到其中一个节点，双节点必须同时部署到A和B两个节点。接下来的几天会不断接收用户请求，请求总共有两种类型，一种是add,意味着你要将该种类型的虚拟机部署到当前所拥有的服务器中。另一种是del，即将之前部署的虚拟机在服务器中释放掉。我们一次只能知道k天的所有请求，我们的目标是基于这些请求，通过服务器购买策略和虚拟机部署策略以及虚拟机迁移策略，使最后的总成本最低。总成本即购买服务器消耗的硬件成本和服务器的使用成本。迁移策略的意思是在每天处理请求之前，我们可以将当前服务器中的虚拟机进行迁移。</p>
+<p>先放一下代码</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;unordered_map&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;vector&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;stdlib.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;queue&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span><span style="color:#75715e">&lt;algorithm&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>using namespace std;
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">long</span> <span style="color:#66d9ef">long</span> ll;
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> A{
+	string name;
+	<span style="color:#66d9ef">int</span> cpu;
+	<span style="color:#66d9ef">int</span> mem;
+	ll hardware_cost;
+	ll energy_cost;
+}Server;
+
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> B{
+	string name;
+	<span style="color:#66d9ef">int</span> cpu;
+	<span style="color:#66d9ef">int</span> mem;
+	<span style="color:#66d9ef">int</span> is_double_node;
+}Vm;
+
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> C{
+	string name;
+	string vm_name;
+	ll vm_id;
+}Req;
+
+
+
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> E{
+	unordered_map<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> vmLocs;
+	string name;
+	<span style="color:#66d9ef">int</span> cap_cpu;
+	<span style="color:#66d9ef">int</span> cap_mem;
+	<span style="color:#66d9ef">int</span> A_left_cpu;
+	<span style="color:#66d9ef">int</span> A_left_mem;
+	<span style="color:#66d9ef">int</span> B_left_cpu;
+	<span style="color:#66d9ef">int</span> B_left_mem;
+	<span style="color:#66d9ef">int</span> score;
+	<span style="color:#66d9ef">int</span> server_id;
+	<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">set_id</span>(<span style="color:#66d9ef">int</span> x){
+		server_id<span style="color:#f92672">=</span>x;
+	}
+}MyServer;
+unordered_map<span style="color:#f92672">&lt;</span>string,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> get_vm;<span style="color:#75715e">//得到vms的下标
+</span><span style="color:#75715e"></span>unordered_map<span style="color:#f92672">&lt;</span>ll,string<span style="color:#f92672">&gt;</span>get_vm_byid;
+unordered_map<span style="color:#f92672">&lt;</span>string,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> get_server;<span style="color:#75715e">//得到servers的下标
+</span><span style="color:#75715e"></span>unordered_map<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> get_loc;<span style="color:#75715e">//根据vm_id找到虚拟机配置信息
+</span><span style="color:#75715e"></span>vector<span style="color:#f92672">&lt;</span>MyServer<span style="color:#f92672">&gt;</span> myServer;<span style="color:#75715e">//购买的服务器列表
+</span><span style="color:#75715e"></span>vector<span style="color:#f92672">&lt;</span>Server<span style="color:#f92672">&gt;</span>servers;
+vector<span style="color:#f92672">&lt;</span>Server<span style="color:#f92672">&gt;</span>servers_sort;
+vector<span style="color:#f92672">&lt;</span>Vm<span style="color:#f92672">&gt;</span>vms;
+unordered_map<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span>,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>need_migrate;
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">input_serverandvm</span>(){
+	<span style="color:#66d9ef">int</span> n;
+	cin<span style="color:#f92672">&gt;&gt;</span>n;
+	string line;
+	getline(cin,line);
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>n;i<span style="color:#f92672">++</span>){
+		getline(cin,line);
+		<span style="color:#75715e">//cout&lt;&lt;line;
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">//cout&lt;&lt;&#34;read data done&#34;&lt;&lt;to_string(i)&lt;&lt;endl;
+</span><span style="color:#75715e"></span>		string pre<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>;
+		string ans[<span style="color:#ae81ff">5</span>];
+		<span style="color:#66d9ef">int</span> k<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+		<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;j<span style="color:#f92672">&lt;</span>line.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;j<span style="color:#f92672">++</span>){
+			<span style="color:#66d9ef">if</span>(line[j]<span style="color:#f92672">==</span><span style="color:#e6db74">&#39; &#39;</span>)
+				<span style="color:#66d9ef">continue</span>;
+			<span style="color:#66d9ef">if</span>(line[j]<span style="color:#f92672">==</span><span style="color:#e6db74">&#39;,&#39;</span>){
+				ans[k<span style="color:#f92672">++</span>]<span style="color:#f92672">=</span>pre;
+				pre<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>;
+				<span style="color:#66d9ef">continue</span>;
+			}
+			pre<span style="color:#f92672">+=</span>line[j];
+			<span style="color:#66d9ef">if</span>(j<span style="color:#f92672">==</span>line.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>)
+				ans[k<span style="color:#f92672">++</span>]<span style="color:#f92672">=</span>pre;
+		}
+		Server server<span style="color:#f92672">=</span>{ans[<span style="color:#ae81ff">0</span>],atoi(ans[<span style="color:#ae81ff">1</span>].c_str()),atoi(ans[<span style="color:#ae81ff">2</span>].c_str()),ll(atoi(ans[<span style="color:#ae81ff">3</span>].c_str())),ll(atoi(ans[<span style="color:#ae81ff">4</span>].c_str()))};
+		Server server_sort<span style="color:#f92672">=</span>{ans[<span style="color:#ae81ff">0</span>],atoi(ans[<span style="color:#ae81ff">1</span>].c_str()),atoi(ans[<span style="color:#ae81ff">2</span>].c_str()),ll(atoi(ans[<span style="color:#ae81ff">3</span>].c_str())),ll(atoi(ans[<span style="color:#ae81ff">4</span>].c_str()))};
+		servers.push_back(server);
+		servers_sort.push_back(server_sort);
+		get_server[ans[<span style="color:#ae81ff">0</span>]]<span style="color:#f92672">=</span>servers.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+	}
+	<span style="color:#66d9ef">int</span> m;
+	cin<span style="color:#f92672">&gt;&gt;</span>m;
+	getline(cin,line);
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>m;i<span style="color:#f92672">++</span>){
+		getline(cin,line);
+		<span style="color:#75715e">//cout&lt;&lt;&#34;read data done&#34;&lt;&lt;to_string(i)&lt;&lt;endl;
+</span><span style="color:#75715e"></span>		string pre<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>;
+		string ans[<span style="color:#ae81ff">4</span>];
+		<span style="color:#66d9ef">int</span> k<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+		<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;j<span style="color:#f92672">&lt;</span>line.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;j<span style="color:#f92672">++</span>){
+			<span style="color:#66d9ef">if</span>(line[j]<span style="color:#f92672">==</span><span style="color:#e6db74">&#39; &#39;</span>)
+				<span style="color:#66d9ef">continue</span>;
+			<span style="color:#66d9ef">if</span>(line[j]<span style="color:#f92672">==</span><span style="color:#e6db74">&#39;,&#39;</span>){
+				ans[k<span style="color:#f92672">++</span>]<span style="color:#f92672">=</span>pre;
+				pre<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>;
+				<span style="color:#66d9ef">continue</span>;
+			}
+			pre<span style="color:#f92672">+=</span>line[j];
+			<span style="color:#66d9ef">if</span>(j<span style="color:#f92672">==</span>line.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>)
+				ans[k<span style="color:#f92672">++</span>]<span style="color:#f92672">=</span>pre;
+		}
+		Vm vm<span style="color:#f92672">=</span>{ans[<span style="color:#ae81ff">0</span>],atoi(ans[<span style="color:#ae81ff">1</span>].c_str()),atoi(ans[<span style="color:#ae81ff">2</span>].c_str()),atoi(ans[<span style="color:#ae81ff">3</span>].c_str())};
+		vms.push_back(vm);
+		get_vm[ans[<span style="color:#ae81ff">0</span>]]<span style="color:#f92672">=</span>vms.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+	}
+}
+
+
+
+<span style="color:#75715e">//读入每一天的请求
+</span><span style="color:#75715e"></span>vector<span style="color:#f92672">&lt;</span>Req<span style="color:#f92672">&gt;</span> readOp(){
+	<span style="color:#66d9ef">int</span> r;
+	cin<span style="color:#f92672">&gt;&gt;</span>r;
+	string line;
+	string ans[<span style="color:#ae81ff">3</span>];
+	vector<span style="color:#f92672">&lt;</span>Req<span style="color:#f92672">&gt;</span> reqs;
+	getline(cin,line);
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>r;i<span style="color:#f92672">++</span>){
+		getline(cin,line);
+		string pre<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>;
+		<span style="color:#66d9ef">int</span> k<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+		<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;j<span style="color:#f92672">&lt;</span>line.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;j<span style="color:#f92672">++</span>){
+			<span style="color:#66d9ef">if</span>(line[j]<span style="color:#f92672">==</span><span style="color:#e6db74">&#39; &#39;</span>)
+				<span style="color:#66d9ef">continue</span>;
+			<span style="color:#66d9ef">if</span>(line[j]<span style="color:#f92672">==</span><span style="color:#e6db74">&#39;,&#39;</span>){
+				ans[k<span style="color:#f92672">++</span>]<span style="color:#f92672">=</span>pre;
+				pre<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>;
+				<span style="color:#66d9ef">continue</span>;
+			}
+			pre<span style="color:#f92672">+=</span>line[j];
+			<span style="color:#66d9ef">if</span>(j<span style="color:#f92672">==</span>line.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>)
+				ans[k<span style="color:#f92672">++</span>]<span style="color:#f92672">=</span>pre;
+		}
+		<span style="color:#66d9ef">if</span>(ans[<span style="color:#ae81ff">0</span>]<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;add&#34;</span>){
+			Req req<span style="color:#f92672">=</span>{ans[<span style="color:#ae81ff">0</span>],ans[<span style="color:#ae81ff">1</span>],ll(atoi(ans[<span style="color:#ae81ff">2</span>].c_str()))};
+			reqs.push_back(req);
+			get_vm_byid[req.vm_id]<span style="color:#f92672">=</span>req.vm_name;
+		}
+		<span style="color:#66d9ef">else</span>{
+			Req req<span style="color:#f92672">=</span>{ans[<span style="color:#ae81ff">0</span>],<span style="color:#e6db74">&#34; &#34;</span>,ll(atoi(ans[<span style="color:#ae81ff">1</span>].c_str()))};
+			reqs.push_back(req);
+		}
+	}
+	<span style="color:#66d9ef">return</span> reqs;
+}
+
+<span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> X{
+	vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span>locs;
+	vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span>purchase;
+}Output;
+
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">printInfo</span>(vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span>migrations,Output output){
+	vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span>locs<span style="color:#f92672">=</span>output.locs;
+	vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span>purchases<span style="color:#f92672">=</span>output.purchase;
+	<span style="color:#66d9ef">int</span> len_p<span style="color:#f92672">=</span>purchases.size();
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>len_p;i<span style="color:#f92672">++</span>)
+		cout<span style="color:#f92672">&lt;&lt;</span>purchases[i]<span style="color:#f92672">&lt;&lt;</span>endl;
+	<span style="color:#66d9ef">int</span> len_m<span style="color:#f92672">=</span>migrations.size();
+	cout<span style="color:#f92672">&lt;&lt;</span><span style="color:#e6db74">&#34;(migration,&#34;</span><span style="color:#f92672">&lt;&lt;</span>len_m<span style="color:#f92672">&lt;&lt;</span><span style="color:#e6db74">&#34;)&#34;</span><span style="color:#f92672">&lt;&lt;</span>endl;
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>len_m;i<span style="color:#f92672">++</span>)
+		cout<span style="color:#f92672">&lt;&lt;</span>migrations[i]<span style="color:#f92672">&lt;&lt;</span>endl;
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>locs.size();i<span style="color:#f92672">++</span>)
+		cout<span style="color:#f92672">&lt;&lt;</span>locs[i]<span style="color:#f92672">&lt;&lt;</span>endl;
+}
+vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span>infors;
+vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span>Req<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span> reqQ;
+<span style="color:#66d9ef">int</span> days<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+<span style="color:#66d9ef">int</span> nov<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+Output <span style="color:#a6e22e">processRequest</span>(vector<span style="color:#f92672">&lt;</span>vector<span style="color:#f92672">&lt;</span>Req<span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span> reqQ,<span style="color:#66d9ef">int</span> t){
+	need_migrate.clear();
+	<span style="color:#66d9ef">double</span> r1<span style="color:#f92672">=</span><span style="color:#ae81ff">1.2</span>;<span style="color:#75715e">//部署时平衡系数占比   1.2
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">double</span> r2<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;<span style="color:#75715e">//购买时预测的资源占比  1
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">double</span> q<span style="color:#f92672">=</span><span style="color:#ae81ff">1.2</span>;<span style="color:#75715e">//购买时使用成本比重。  1.2
+</span><span style="color:#75715e"></span>	vector<span style="color:#f92672">&lt;</span>Req<span style="color:#f92672">&gt;</span> req<span style="color:#f92672">=</span>reqQ[days<span style="color:#f92672">++</span>];
+	Output x;
+	vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> locs;
+	vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> purchases;
+	<span style="color:#66d9ef">int</span> len_req<span style="color:#f92672">=</span>req.size();
+	<span style="color:#66d9ef">int</span> server_id_begin<span style="color:#f92672">=</span>myServer.size();
+	<span style="color:#66d9ef">int</span> buy_sum<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+	unordered_map<span style="color:#f92672">&lt;</span>string,vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span>buy_servers;<span style="color:#75715e">//今天购买的服务器重新编号
+</span><span style="color:#75715e"></span>	unordered_map<span style="color:#f92672">&lt;</span>string,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>vm_number;
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> re:req){
+		<span style="color:#66d9ef">if</span>(re.name<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;add&#34;</span>){
+			<span style="color:#66d9ef">int</span> n<span style="color:#f92672">=</span>vm_number[re.vm_name];
+			n<span style="color:#f92672">++</span>;
+			vm_number[re.vm_name]<span style="color:#f92672">=</span>n;
+		}
+	}
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>len_req;i<span style="color:#f92672">++</span>){<span style="color:#75715e">//操作类型、虚拟机类型、虚拟机id
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">if</span>(req[i].name<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;add&#34;</span>){
+			nov<span style="color:#f92672">++</span>;
+			<span style="color:#66d9ef">int</span> loc_success<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+			<span style="color:#66d9ef">int</span> loc_server<span style="color:#f92672">=-</span><span style="color:#ae81ff">1</span>;
+			<span style="color:#66d9ef">int</span> loc_node<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+			<span style="color:#66d9ef">int</span> vm_id<span style="color:#f92672">=</span>req[i].vm_id;
+			<span style="color:#66d9ef">double</span> min_loc_score<span style="color:#f92672">=</span><span style="color:#ae81ff">1e6</span>;
+			Vm vm<span style="color:#f92672">=</span>vms[get_vm[req[i].vm_name]];
+			<span style="color:#75715e">//遍历当前服务器，找到剩余空间最小的一个并进行放置
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;j<span style="color:#f92672">&lt;</span>myServer.size();j<span style="color:#f92672">++</span>){
+				<span style="color:#66d9ef">double</span> vr<span style="color:#f92672">=</span><span style="color:#66d9ef">double</span>(vm.cpu)<span style="color:#f92672">/</span>vm.mem;
+				<span style="color:#66d9ef">if</span>(vm.is_double_node){
+					<span style="color:#66d9ef">if</span>(myServer[j].A_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_mem<span style="color:#f92672">&gt;=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_mem<span style="color:#f92672">&gt;=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>){
+						<span style="color:#66d9ef">double</span> loc_score<span style="color:#f92672">=</span>myServer[j].A_left_cpu<span style="color:#f92672">+</span>myServer[j].B_left_cpu<span style="color:#f92672">+</span>myServer[j].A_left_mem<span style="color:#f92672">+</span>myServer[j].B_left_mem<span style="color:#f92672">-</span>vm.cpu<span style="color:#f92672">-</span>vm.mem;
+						<span style="color:#66d9ef">double</span> sr_a<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)myServer[j].A_left_cpu<span style="color:#f92672">/</span>myServer[j].A_left_mem;
+						<span style="color:#66d9ef">double</span> sr_b<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)myServer[j].B_left_cpu<span style="color:#f92672">/</span>myServer[j].B_left_mem;
+						loc_score<span style="color:#f92672">=</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">+</span>r1<span style="color:#f92672">*</span>abs(sr_a<span style="color:#f92672">+</span>sr_b<span style="color:#f92672">-</span>vr<span style="color:#f92672">-</span>vr))<span style="color:#f92672">*</span>loc_score;
+						<span style="color:#75715e">//double loc_score=1.0*(myServer[j].A_left_cpu+myServer[j].B_left_cpu+myServer[j].A_left_mem+myServer[j].B_left_mem)/(myServer[j].cap_cpu+myServer[j].cap_mem);
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">if</span>(loc_score<span style="color:#f92672">&lt;</span>min_loc_score){
+							loc_success<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+							min_loc_score<span style="color:#f92672">=</span>loc_score;
+							loc_server<span style="color:#f92672">=</span>j;
+						}
+					}
+				}<span style="color:#66d9ef">else</span>{
+					<span style="color:#66d9ef">if</span>(myServer[j].A_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_mem<span style="color:#f92672">&gt;=</span>vm.mem){
+						<span style="color:#66d9ef">double</span> loc_score<span style="color:#f92672">=</span>myServer[j].A_left_cpu<span style="color:#f92672">+</span>myServer[j].A_left_mem<span style="color:#f92672">-</span>vm.cpu<span style="color:#f92672">-</span>vm.mem;
+						<span style="color:#66d9ef">double</span> sr<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)myServer[j].A_left_cpu<span style="color:#f92672">/</span>myServer[j].A_left_mem;
+						loc_score<span style="color:#f92672">=</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">+</span>r1<span style="color:#f92672">*</span>abs(sr<span style="color:#f92672">-</span>vr))<span style="color:#f92672">*</span>loc_score;
+						<span style="color:#75715e">//double loc_score=2.0*(myServer[j].A_left_cpu+myServer[j].A_left_mem)/(myServer[j].cap_cpu+myServer[j].cap_mem);
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">if</span>(loc_score<span style="color:#f92672">&lt;</span>min_loc_score){
+							loc_success<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+							min_loc_score<span style="color:#f92672">=</span>loc_score;
+							loc_server<span style="color:#f92672">=</span>j;
+							loc_node<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+						}
+					}
+					<span style="color:#66d9ef">if</span>(myServer[j].B_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_mem<span style="color:#f92672">&gt;=</span>vm.mem){
+						<span style="color:#66d9ef">double</span> loc_score<span style="color:#f92672">=</span>myServer[j].B_left_cpu<span style="color:#f92672">+</span>myServer[j].B_left_mem<span style="color:#f92672">-</span>vm.cpu<span style="color:#f92672">-</span>vm.mem;
+						<span style="color:#66d9ef">double</span> sr<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)myServer[j].B_left_cpu<span style="color:#f92672">/</span>myServer[j].B_left_mem;
+						loc_score<span style="color:#f92672">=</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">+</span>abs(sr<span style="color:#f92672">-</span>vr))<span style="color:#f92672">*</span>loc_score;
+						<span style="color:#75715e">//double loc_score=2.0*(myServer[j].B_left_cpu+myServer[j].B_left_mem)/(myServer[j].cap_cpu+myServer[j].cap_mem);
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">if</span>(loc_score<span style="color:#f92672">&lt;</span>min_loc_score){
+							loc_success<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+							min_loc_score<span style="color:#f92672">=</span>loc_score;
+							loc_server<span style="color:#f92672">=</span>j;
+							loc_node<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+						}
+					}
+				}
+			}
+				<span style="color:#75715e">//cout&lt;&lt;&#34;gumai&#34;&lt;&lt;to_string(loc_success)&lt;&lt;endl;
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">//如果没有放置那么进行扩容
+</span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>loc_success){
+					<span style="color:#75715e">//买进服务器直接查到当前服务器队列即可，更新loc_server;
+</span><span style="color:#75715e"></span>					<span style="color:#66d9ef">int</span> buy_server<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+					string max_vm_name;
+					<span style="color:#66d9ef">int</span> max_vm_num<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+					<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> t<span style="color:#f92672">=</span>vm_number.begin();t<span style="color:#f92672">!=</span>vm_number.end();t<span style="color:#f92672">++</span>){
+						<span style="color:#66d9ef">if</span>((t<span style="color:#f92672">-&gt;</span>second)<span style="color:#f92672">&gt;</span>max_vm_num){
+							max_vm_num<span style="color:#f92672">=</span>t<span style="color:#f92672">-&gt;</span>second;
+							max_vm_name<span style="color:#f92672">=</span>t<span style="color:#f92672">-&gt;</span>first;
+						}
+					}
+					Vm vm1<span style="color:#f92672">=</span>vms[get_vm[max_vm_name]];
+					
+					<span style="color:#66d9ef">double</span> cm_ratio<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)vm.cpu<span style="color:#f92672">/</span>vm.mem;
+					<span style="color:#66d9ef">double</span> need_cpu<span style="color:#f92672">=</span>vm.cpu;
+					<span style="color:#66d9ef">double</span> need_mem<span style="color:#f92672">=</span>vm.mem;
+					<span style="color:#66d9ef">int</span> f<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+					<span style="color:#66d9ef">int</span> len<span style="color:#f92672">=</span><span style="color:#ae81ff">150</span>;<span style="color:#75715e">//55
+</span><span style="color:#75715e"></span>					unordered_map<span style="color:#f92672">&lt;</span>string,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>del;
+					<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> l<span style="color:#f92672">=</span>i<span style="color:#f92672">+</span><span style="color:#ae81ff">1</span>;l<span style="color:#f92672">&lt;</span>len_req;l<span style="color:#f92672">++</span>){
+						<span style="color:#66d9ef">if</span>(f<span style="color:#f92672">&gt;</span>len)
+							<span style="color:#66d9ef">break</span>;
+						Vm tmp<span style="color:#f92672">=</span>vms[get_vm[req[l].vm_name]];
+						<span style="color:#66d9ef">if</span>(req[l].name<span style="color:#f92672">!=</span><span style="color:#e6db74">&#34;add&#34;</span>){
+							del[req[l].name]<span style="color:#f92672">++</span>;
+							<span style="color:#66d9ef">continue</span>;
+						}
+						<span style="color:#75715e">// if(del[req[l].name]&gt;0){
+</span><span style="color:#75715e"></span>						<span style="color:#75715e">// 	del[req[l].name]--;
+</span><span style="color:#75715e"></span>						<span style="color:#75715e">// 	continue;
+</span><span style="color:#75715e"></span>						<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>						need_cpu<span style="color:#f92672">+=</span>tmp.cpu;
+						need_mem<span style="color:#f92672">+=</span>tmp.mem;
+						f<span style="color:#f92672">++</span>;
+					}
+					<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> l<span style="color:#f92672">=</span>days;l<span style="color:#f92672">&lt;</span>reqQ.size();l<span style="color:#f92672">++</span>){
+						vector<span style="color:#f92672">&lt;</span>Req<span style="color:#f92672">&gt;</span> req_tmp<span style="color:#f92672">=</span>reqQ[l];
+						<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> x:req_tmp){
+							<span style="color:#66d9ef">if</span>(f<span style="color:#f92672">&gt;</span>len)
+								<span style="color:#66d9ef">break</span>;
+							Vm tmp<span style="color:#f92672">=</span>vms[get_vm[x.vm_name]];
+							<span style="color:#66d9ef">if</span>(x.name<span style="color:#f92672">!=</span><span style="color:#e6db74">&#34;add&#34;</span>){
+								del[x.name]<span style="color:#f92672">++</span>;
+								<span style="color:#66d9ef">continue</span>;
+							}
+							<span style="color:#75715e">// if(del[x.name]&gt;0){
+</span><span style="color:#75715e"></span>							<span style="color:#75715e">// 	del[x.name]--;
+</span><span style="color:#75715e"></span>							<span style="color:#75715e">// 	continue;
+</span><span style="color:#75715e"></span>							<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>							need_cpu<span style="color:#f92672">+=</span>tmp.cpu;
+							need_mem<span style="color:#f92672">+=</span>tmp.mem;
+							f<span style="color:#f92672">++</span>;
+						}
+					}
+					need_cpu<span style="color:#f92672">=</span>need_cpu<span style="color:#f92672">*</span>r2;
+					need_mem<span style="color:#f92672">=</span>need_mem<span style="color:#f92672">*</span>r2;
+					sort(servers_sort.begin(),servers_sort.end(),[need_cpu,need_mem,q,cm_ratio,t](Server x,Server y){
+						<span style="color:#66d9ef">double</span> x_cm_ratio<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)x.cpu<span style="color:#f92672">/</span>x.mem;
+						<span style="color:#66d9ef">double</span> y_cm_ratio<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)y.cpu<span style="color:#f92672">/</span>y.mem;
+						<span style="color:#66d9ef">double</span> numx<span style="color:#f92672">=</span>max(need_cpu<span style="color:#f92672">/</span>x.cpu,need_mem<span style="color:#f92672">/</span>x.mem)<span style="color:#f92672">*</span><span style="color:#ae81ff">0.95</span>;
+						<span style="color:#66d9ef">double</span> numy<span style="color:#f92672">=</span>max(need_cpu<span style="color:#f92672">/</span>y.cpu,need_mem<span style="color:#f92672">/</span>y.mem)<span style="color:#f92672">*</span><span style="color:#ae81ff">0.95</span>;
+						<span style="color:#66d9ef">return</span> numx<span style="color:#f92672">*</span>(x.hardware_cost<span style="color:#f92672">+</span>q<span style="color:#f92672">*</span>x.energy_cost<span style="color:#f92672">*</span>(t<span style="color:#f92672">-</span>days))<span style="color:#f92672">&lt;</span>numy<span style="color:#f92672">*</span>(y.hardware_cost<span style="color:#f92672">+</span>q<span style="color:#f92672">*</span>y.energy_cost<span style="color:#f92672">*</span>(t<span style="color:#f92672">-</span>days));
+					});
+					<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;j<span style="color:#f92672">&lt;</span>servers_sort.size();j<span style="color:#f92672">++</span>){
+						<span style="color:#66d9ef">if</span>(vm.cpu<span style="color:#f92672">&lt;=</span>servers_sort[j].cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>vm.mem<span style="color:#f92672">&lt;=</span>servers_sort[j].mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;!</span>vm.is_double_node){
+							buy_server<span style="color:#f92672">=</span>j;
+							<span style="color:#66d9ef">break</span>;
+						}
+						<span style="color:#66d9ef">if</span>(vm.cpu<span style="color:#f92672">&lt;=</span>servers_sort[j].cpu<span style="color:#f92672">&amp;&amp;</span>vm.mem<span style="color:#f92672">&lt;=</span>servers_sort[j].mem<span style="color:#f92672">&amp;&amp;</span>vm.is_double_node){
+							buy_server<span style="color:#f92672">=</span>j;
+							<span style="color:#66d9ef">break</span>;
+						}
+					}
+					string server_name<span style="color:#f92672">=</span>servers_sort[buy_server].name;
+					unordered_map<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> l;
+					<span style="color:#66d9ef">int</span> cpu<span style="color:#f92672">=</span>servers_sort[buy_server].cpu;
+					<span style="color:#66d9ef">int</span> mem<span style="color:#f92672">=</span>servers_sort[buy_server].mem;
+					MyServer my<span style="color:#f92672">=</span>{l,server_name,cpu,mem,cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>,mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>,cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>,mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">0</span>,<span style="color:#f92672">-</span><span style="color:#ae81ff">5</span>};
+					loc_server<span style="color:#f92672">=</span>myServer.size();<span style="color:#75715e">//在myServer中的下标
+</span><span style="color:#75715e"></span>					myServer.push_back(my);
+					loc_node<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+					vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>tmp<span style="color:#f92672">=</span> buy_servers[server_name];
+					tmp.push_back(loc_server);
+					buy_servers[server_name]<span style="color:#f92672">=</span>tmp;
+					buy_sum<span style="color:#f92672">++</span>;
+				}
+				<span style="color:#75715e">// if(req[i].vm_id==388527883||req[i].vm_id==466887103||req[i].vm_id==489922436){
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">// 	infors.push_back(&#34;vminfos--cpu:&#34;+to_string(vm.cpu)+&#34;mem:&#34;+to_string(vm.mem)+&#34;is_double_node:&#34;+to_string(vm.is_double_node));
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">// 	infors.push_back(&#34;serverinfos--A_left_cpu:&#34;+to_string(myServer[loc_server].A_left_cpu)+&#34;A_left_mem:&#34;+to_string(myServer[loc_server].A_left_mem)+
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">// 	&#34;B_left_cpu:&#34;+to_string(myServer[loc_server].B_left_cpu)+&#34;B_left_mem:&#34;+to_string(myServer[loc_server].B_left_mem));
+</span><span style="color:#75715e"></span>
+				<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">//更新状态
+</span><span style="color:#75715e"></span>				<span style="color:#66d9ef">if</span>(vm.is_double_node){
+					myServer[loc_server].A_left_cpu<span style="color:#f92672">-=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+					myServer[loc_server].B_left_cpu<span style="color:#f92672">-=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+					myServer[loc_server].A_left_mem<span style="color:#f92672">-=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+					myServer[loc_server].B_left_mem<span style="color:#f92672">-=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+					myServer[loc_server].vmLocs[req[i].vm_id]<span style="color:#f92672">=-</span><span style="color:#ae81ff">1</span>;
+				}<span style="color:#66d9ef">else</span> {
+					<span style="color:#66d9ef">if</span>(loc_node<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>){
+						myServer[loc_server].A_left_cpu<span style="color:#f92672">-=</span>vm.cpu;
+						myServer[loc_server].A_left_mem<span style="color:#f92672">-=</span>vm.mem;
+						myServer[loc_server].vmLocs[req[i].vm_id]<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+					}<span style="color:#66d9ef">else</span>{
+						myServer[loc_server].B_left_cpu<span style="color:#f92672">-=</span>vm.cpu;
+						myServer[loc_server].B_left_mem<span style="color:#f92672">-=</span>vm.mem;
+						myServer[loc_server].vmLocs[req[i].vm_id]<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+					}
+				}
+				get_loc[req[i].vm_id]<span style="color:#f92672">=</span>loc_server;
+				<span style="color:#66d9ef">int</span> n<span style="color:#f92672">=</span>vm_number[req[i].vm_name];
+				n<span style="color:#f92672">--</span>;
+				vm_number[req[i].vm_name]<span style="color:#f92672">=</span>n;
+				need_migrate[loc_server]<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+		}<span style="color:#66d9ef">else</span>{
+			nov<span style="color:#f92672">--</span>;
+			string vm_name<span style="color:#f92672">=</span>get_vm_byid[req[i].vm_id];
+			Vm vm<span style="color:#f92672">=</span>vms[get_vm[vm_name]];
+			<span style="color:#66d9ef">int</span> loc_index<span style="color:#f92672">=</span>get_loc[req[i].vm_id];
+			<span style="color:#66d9ef">int</span> node<span style="color:#f92672">=</span>myServer[loc_index].vmLocs[req[i].vm_id];
+			<span style="color:#66d9ef">if</span>(vm.is_double_node){
+				myServer[loc_index].A_left_cpu<span style="color:#f92672">+=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+				myServer[loc_index].A_left_mem<span style="color:#f92672">+=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+				myServer[loc_index].B_left_cpu<span style="color:#f92672">+=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+				myServer[loc_index].B_left_mem<span style="color:#f92672">+=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+			}<span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span>(node<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>){
+				myServer[loc_index].A_left_cpu<span style="color:#f92672">+=</span>vm.cpu;
+				myServer[loc_index].A_left_mem<span style="color:#f92672">+=</span>vm.mem;
+			}<span style="color:#66d9ef">else</span>{
+				myServer[loc_index].B_left_cpu<span style="color:#f92672">+=</span>vm.cpu;
+				myServer[loc_index].B_left_mem<span style="color:#f92672">+=</span>vm.mem;
+			}
+			<span style="color:#75715e">//删除该虚拟机在服务器中的分布
+</span><span style="color:#75715e"></span>			myServer[loc_index].vmLocs.erase(req[i].vm_id);
+			<span style="color:#75715e">//虚拟机到服务器的映射
+</span><span style="color:#75715e"></span>			get_loc.erase(req[i].vm_id);
+			get_vm_byid.erase(req[i].vm_id);
+			need_migrate[loc_index]<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+		}
+
+	}
+	<span style="color:#75715e">// if(days&gt;20&amp;&amp;days&lt;50){
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// 	vector&lt;double&gt; load;
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// for(auto ser:myServer){
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// 	load.push_back(1.0-(double)(ser.A_left_cpu+ser.A_left_mem+ser.B_left_cpu+ser.B_left_mem)/(ser.cap_cpu+ser.cap_mem));
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// sort(load.begin(),load.end());
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// for(auto x:load){
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// 	cout&lt;&lt;to_string(x)&lt;&lt;&#34; &#34;;
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// cout&lt;&lt;endl;
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>	
+
+
+	purchases.push_back(<span style="color:#e6db74">&#34;(purchase,&#34;</span><span style="color:#f92672">+</span>to_string(buy_servers.size())<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;)&#34;</span>);
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> t<span style="color:#f92672">=</span>buy_servers.begin();t<span style="color:#f92672">!=</span>buy_servers.end();t<span style="color:#f92672">++</span>){
+		vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> tmp<span style="color:#f92672">=</span>t<span style="color:#f92672">-&gt;</span>second;
+		<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> x:tmp){
+			myServer[x].server_id<span style="color:#f92672">=</span>server_id_begin<span style="color:#f92672">++</span>;
+		}
+		purchases.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>t<span style="color:#f92672">-&gt;</span>first<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,&#34;</span><span style="color:#f92672">+</span>to_string(tmp.size())<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;)&#34;</span>);
+	}
+	<span style="color:#75715e">//自己变处理请求边扩容造成的服务器编号和题目要求的服务器编号不同
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>len_req;i<span style="color:#f92672">++</span>){
+		<span style="color:#66d9ef">if</span>(req[i].name<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;add&#34;</span>){
+			MyServer my_loc<span style="color:#f92672">=</span>myServer[get_loc[req[i].vm_id]];
+			Vm vm<span style="color:#f92672">=</span>vms[get_vm[req[i].vm_name]];
+			<span style="color:#75715e">//cout&lt;&lt;vm.name&lt;&lt;to_string(vm.is_double_node)&lt;&lt;endl;
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">if</span>(vm.is_double_node){
+				locs.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(my_loc.server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;)&#34;</span>);
+			}<span style="color:#66d9ef">else</span>{
+				<span style="color:#66d9ef">if</span>(my_loc.vmLocs[req[i].vm_id]<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>)
+					locs.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(my_loc.server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,A)&#34;</span>);
+				<span style="color:#66d9ef">else</span>
+					locs.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(my_loc.server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,B)&#34;</span>);
+				
+			}
+		}
+	}
+	x.locs<span style="color:#f92672">=</span>locs;
+	x.purchase<span style="color:#f92672">=</span>purchases;
+	<span style="color:#66d9ef">return</span> x;
+}
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">canput</span>(ll vm_id,<span style="color:#66d9ef">int</span> j){
+	string vm_name<span style="color:#f92672">=</span>get_vm_byid[vm_id];
+	Vm vm<span style="color:#f92672">=</span>vms[get_vm[vm_name]];
+	<span style="color:#66d9ef">int</span> ans<span style="color:#f92672">=-</span><span style="color:#ae81ff">2</span>;
+	<span style="color:#66d9ef">if</span>(vm_name<span style="color:#f92672">==</span><span style="color:#e6db74">&#34;&#34;</span>)
+		<span style="color:#66d9ef">return</span> ans;
+	<span style="color:#66d9ef">if</span>(vm.is_double_node<span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_mem<span style="color:#f92672">&gt;=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_mem<span style="color:#f92672">&gt;=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>)
+		ans<span style="color:#f92672">=-</span><span style="color:#ae81ff">1</span>;
+	<span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>vm.is_double_node<span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_mem<span style="color:#f92672">&gt;=</span>vm.mem)
+		ans<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+	<span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>vm.is_double_node<span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_mem<span style="color:#f92672">&gt;=</span>vm.mem)
+		ans<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+	<span style="color:#66d9ef">return</span> ans;
+}
+<span style="color:#66d9ef">void</span> <span style="color:#a6e22e">update_migrate_status</span>(<span style="color:#66d9ef">int</span> from_server_index,<span style="color:#66d9ef">int</span> to_server_index,ll from_vm_id,<span style="color:#66d9ef">int</span> to_node){
+	string vm_name<span style="color:#f92672">=</span>get_vm_byid[from_vm_id];
+	Vm vm<span style="color:#f92672">=</span>vms[get_vm[vm_name]];
+	<span style="color:#75715e">//from_server更新
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span>(vm.is_double_node){
+		myServer[from_server_index].A_left_cpu<span style="color:#f92672">+=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+		myServer[from_server_index].B_left_cpu<span style="color:#f92672">+=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+		myServer[from_server_index].A_left_mem<span style="color:#f92672">+=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+		myServer[from_server_index].B_left_mem<span style="color:#f92672">+=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+	}<span style="color:#66d9ef">else</span>{
+		<span style="color:#66d9ef">if</span>(myServer[from_server_index].vmLocs[from_vm_id]<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>){
+			myServer[from_server_index].A_left_cpu<span style="color:#f92672">+=</span>vm.cpu;
+			myServer[from_server_index].A_left_mem<span style="color:#f92672">+=</span>vm.mem;
+		}<span style="color:#66d9ef">else</span>{
+			myServer[from_server_index].B_left_cpu<span style="color:#f92672">+=</span>vm.cpu;
+			myServer[from_server_index].B_left_mem<span style="color:#f92672">+=</span>vm.mem;
+		}
+	}
+	myServer[from_server_index].vmLocs.erase(from_vm_id);
+	<span style="color:#75715e">//to_server更新
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">if</span>(vm.is_double_node){
+		myServer[to_server_index].A_left_cpu<span style="color:#f92672">-=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+		myServer[to_server_index].B_left_cpu<span style="color:#f92672">-=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+		myServer[to_server_index].A_left_mem<span style="color:#f92672">-=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+		myServer[to_server_index].B_left_mem<span style="color:#f92672">-=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>;
+	}<span style="color:#66d9ef">else</span>{
+		<span style="color:#66d9ef">if</span>(to_node<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>){
+			myServer[to_server_index].A_left_cpu<span style="color:#f92672">-=</span>vm.cpu;
+			myServer[to_server_index].A_left_mem<span style="color:#f92672">-=</span>vm.mem;
+		}<span style="color:#66d9ef">else</span>{
+			myServer[to_server_index].B_left_cpu<span style="color:#f92672">-=</span>vm.cpu;
+			myServer[to_server_index].B_left_mem<span style="color:#f92672">-=</span>vm.mem;
+		}
+	}
+	myServer[to_server_index].vmLocs[from_vm_id]<span style="color:#f92672">=</span>to_node;
+	<span style="color:#75715e">//映射更新
+</span><span style="color:#75715e"></span>	get_loc[from_vm_id]<span style="color:#f92672">=</span>to_server_index;
+}
+
+vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> migrate(<span style="color:#66d9ef">int</span> t){
+	vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> migrations;
+	<span style="color:#66d9ef">if</span>(days<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>)
+		<span style="color:#66d9ef">return</span> migrations;
+	<span style="color:#66d9ef">int</span> time_<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+	<span style="color:#66d9ef">int</span> time_thresh<span style="color:#f92672">=</span>nov<span style="color:#f92672">/</span><span style="color:#ae81ff">100</span><span style="color:#f92672">*</span><span style="color:#ae81ff">3</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+	<span style="color:#75715e">//当前服务器按照负载率从小到大排序
+</span><span style="color:#75715e"></span>	vector<span style="color:#f92672">&lt;</span>pair<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">double</span>,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span> load;
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>myServer.size();i<span style="color:#f92672">++</span>){
+		MyServer ser<span style="color:#f92672">=</span>myServer[i];
+		<span style="color:#66d9ef">double</span> r<span style="color:#f92672">=</span>(<span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span>(<span style="color:#66d9ef">double</span>)(ser.A_left_cpu<span style="color:#f92672">+</span>ser.A_left_mem<span style="color:#f92672">+</span>ser.B_left_cpu<span style="color:#f92672">+</span>ser.B_left_mem)<span style="color:#f92672">/</span>(ser.cap_cpu<span style="color:#f92672">+</span>ser.cap_mem));<span style="color:#75715e">//*servers[get_server[ser.name]].energy_cost;
+</span><span style="color:#75715e"></span>		load.push_back(make_pair(r,i));
+	}
+	sort(load.begin(),load.end());
+	<span style="color:#75715e">// int vis[load.size()-1];
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// for(int i=0;i&lt;load.size();i++){
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// 		vis[i]=0;
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>load.size();i<span style="color:#f92672">++</span>){
+		<span style="color:#66d9ef">int</span> cur<span style="color:#f92672">=</span>load[i].second;
+		vector<span style="color:#f92672">&lt;</span>pair<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span>id2nodes;
+		<span style="color:#66d9ef">double</span> load_cur<span style="color:#f92672">=</span><span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span><span style="color:#66d9ef">double</span>(myServer[cur].A_left_cpu<span style="color:#f92672">+</span>myServer[cur].A_left_mem<span style="color:#f92672">+</span>myServer[cur].B_left_cpu<span style="color:#f92672">+</span>myServer[cur].B_left_mem)<span style="color:#f92672">/</span>(myServer[cur].cap_cpu<span style="color:#f92672">+</span>myServer[cur].cap_mem);
+		<span style="color:#66d9ef">if</span>(load_cur<span style="color:#f92672">&gt;</span><span style="color:#ae81ff">0.99</span>)
+			<span style="color:#66d9ef">continue</span>;
+		<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> t<span style="color:#f92672">=</span>myServer[cur].vmLocs.begin();t<span style="color:#f92672">!=</span>myServer[cur].vmLocs.end();t<span style="color:#f92672">++</span>){
+			ll vm_id<span style="color:#f92672">=</span>t<span style="color:#f92672">-&gt;</span>first;
+			<span style="color:#66d9ef">int</span> node<span style="color:#f92672">=</span>t<span style="color:#f92672">-&gt;</span>second;
+			id2nodes.push_back(make_pair(vm_id,node));
+		}
+		<span style="color:#75715e">//虚拟机排个序 
+</span><span style="color:#75715e"></span>		sort(id2nodes.begin(),id2nodes.end(),[](pair<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>a,pair<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>b){
+			Vm vma<span style="color:#f92672">=</span>vms[get_vm[get_vm_byid[a.first]]];
+			Vm vmb<span style="color:#f92672">=</span>vms[get_vm[get_vm_byid[b.first]]];
+			<span style="color:#66d9ef">return</span> vma.cpu<span style="color:#f92672">+</span>vma.mem<span style="color:#f92672">&lt;</span>vmb.cpu<span style="color:#f92672">+</span>vmb.mem;
+		});
+		
+		<span style="color:#75715e">//遍历该服务器上的所有虚拟机
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> id_node:id2nodes){
+			ll vm_id<span style="color:#f92672">=</span>id_node.first;
+			string vm_name<span style="color:#f92672">=</span>get_vm_byid[vm_id];
+			Vm vm<span style="color:#f92672">=</span>vms[get_vm[vm_name]];
+			<span style="color:#66d9ef">double</span> min_loc_score<span style="color:#f92672">=</span><span style="color:#ae81ff">1e7</span>;
+			<span style="color:#66d9ef">int</span> loc_server<span style="color:#f92672">=-</span><span style="color:#ae81ff">1</span>;
+			<span style="color:#66d9ef">int</span> loc_node<span style="color:#f92672">=-</span><span style="color:#ae81ff">5</span>;
+			<span style="color:#75715e">//遍历出待迁服务器外的所有服务器进行插入
+</span><span style="color:#75715e"></span>			<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> k<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;k<span style="color:#f92672">&lt;</span>load.size();k<span style="color:#f92672">++</span>){
+				<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span>load[k].second;
+				<span style="color:#66d9ef">if</span>(cur<span style="color:#f92672">==</span>j)<span style="color:#66d9ef">continue</span>;
+				<span style="color:#66d9ef">double</span> load_j<span style="color:#f92672">=</span><span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span><span style="color:#66d9ef">double</span>(myServer[j].A_left_cpu<span style="color:#f92672">+</span>myServer[j].A_left_mem<span style="color:#f92672">+</span>myServer[j].B_left_cpu<span style="color:#f92672">+</span>myServer[j].B_left_mem)<span style="color:#f92672">/</span>(myServer[j].cap_cpu<span style="color:#f92672">+</span>myServer[j].cap_mem);
+				<span style="color:#75715e">// if(load_ratio&gt;=0.99){
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">// 	pre=j;
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">// 	continue;
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>				<span style="color:#75715e">//if(vis[cur])continue;
+</span><span style="color:#75715e"></span>				<span style="color:#66d9ef">double</span> vr<span style="color:#f92672">=</span><span style="color:#66d9ef">double</span>(vm.cpu)<span style="color:#f92672">/</span>vm.mem;
+				<span style="color:#66d9ef">if</span>(vm.is_double_node){
+					<span style="color:#66d9ef">if</span>(load_j<span style="color:#f92672">&gt;</span>load_cur<span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_mem<span style="color:#f92672">&gt;=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span><span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_mem<span style="color:#f92672">&gt;=</span>vm.mem<span style="color:#f92672">/</span><span style="color:#ae81ff">2</span>){
+						<span style="color:#66d9ef">double</span> loc_score<span style="color:#f92672">=</span>myServer[j].A_left_cpu<span style="color:#f92672">+</span>myServer[j].B_left_cpu<span style="color:#f92672">+</span>myServer[j].A_left_mem<span style="color:#f92672">+</span>myServer[j].B_left_mem<span style="color:#f92672">-</span>vm.cpu<span style="color:#f92672">-</span>vm.mem;
+						<span style="color:#66d9ef">double</span> sr_a<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)myServer[j].A_left_cpu<span style="color:#f92672">/</span>myServer[j].A_left_mem;
+						<span style="color:#66d9ef">double</span> sr_b<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)myServer[j].B_left_cpu<span style="color:#f92672">/</span>myServer[j].B_left_mem;
+						loc_score<span style="color:#f92672">=</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1.2</span><span style="color:#f92672">*</span>abs(sr_a<span style="color:#f92672">+</span>sr_b<span style="color:#f92672">-</span>vr<span style="color:#f92672">-</span>vr))<span style="color:#f92672">*</span>loc_score;
+						<span style="color:#75715e">//loc_score=1.2*abs(sr_a+sr_b-vr-vr);
+</span><span style="color:#75715e"></span>						<span style="color:#75715e">//double loc_score=1.0*(myServer[j].A_left_cpu+myServer[j].B_left_cpu+myServer[j].A_left_mem+myServer[j].B_left_mem)/(myServer[j].cap_cpu+myServer[j].cap_mem);
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">if</span>(loc_score<span style="color:#f92672">&lt;</span>min_loc_score){
+							min_loc_score<span style="color:#f92672">=</span>loc_score;
+							loc_server<span style="color:#f92672">=</span>j;
+							loc_node<span style="color:#f92672">=-</span><span style="color:#ae81ff">1</span>;
+						}
+					}
+				}<span style="color:#66d9ef">else</span>{
+					<span style="color:#66d9ef">if</span>(load_j<span style="color:#f92672">&gt;</span>load_cur<span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">&amp;&amp;</span>myServer[j].A_left_mem<span style="color:#f92672">&gt;=</span>vm.mem){
+						<span style="color:#66d9ef">double</span> loc_score<span style="color:#f92672">=</span>myServer[j].A_left_cpu<span style="color:#f92672">+</span>myServer[j].A_left_mem<span style="color:#f92672">-</span>vm.cpu<span style="color:#f92672">-</span>vm.mem;
+						<span style="color:#66d9ef">double</span> sr<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)myServer[j].A_left_cpu<span style="color:#f92672">/</span>myServer[j].A_left_mem;
+						loc_score<span style="color:#f92672">=</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1.2</span><span style="color:#f92672">*</span>abs(sr<span style="color:#f92672">-</span>vr))<span style="color:#f92672">*</span>loc_score;
+						<span style="color:#75715e">//double loc_score=2.0*(myServer[j].A_left_cpu+myServer[j].A_left_mem)/(myServer[j].cap_cpu+myServer[j].cap_mem);
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">if</span>(loc_score<span style="color:#f92672">&lt;</span>min_loc_score){
+							min_loc_score<span style="color:#f92672">=</span>loc_score;
+							loc_server<span style="color:#f92672">=</span>j;
+							loc_node<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+						}
+					}
+					<span style="color:#66d9ef">if</span>(load_j<span style="color:#f92672">&gt;</span>load_cur<span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_cpu<span style="color:#f92672">&gt;=</span>vm.cpu<span style="color:#f92672">&amp;&amp;</span>myServer[j].B_left_mem<span style="color:#f92672">&gt;=</span>vm.mem){
+						<span style="color:#66d9ef">double</span> loc_score<span style="color:#f92672">=</span>myServer[j].B_left_cpu<span style="color:#f92672">+</span>myServer[j].B_left_mem<span style="color:#f92672">-</span>vm.cpu<span style="color:#f92672">-</span>vm.mem;
+						<span style="color:#66d9ef">double</span> sr<span style="color:#f92672">=</span>(<span style="color:#66d9ef">double</span>)myServer[j].B_left_cpu<span style="color:#f92672">/</span>myServer[j].B_left_mem;
+						loc_score<span style="color:#f92672">=</span>(<span style="color:#ae81ff">1</span><span style="color:#f92672">+</span><span style="color:#ae81ff">1.2</span><span style="color:#f92672">*</span>abs(sr<span style="color:#f92672">-</span>vr))<span style="color:#f92672">*</span>loc_score;
+						<span style="color:#75715e">//loc_score=1.2*abs(sr-vr);
+</span><span style="color:#75715e"></span>						<span style="color:#75715e">//double loc_score=2.0*(myServer[j].B_left_cpu+myServer[j].B_left_mem)/(myServer[j].cap_cpu+myServer[j].cap_mem);
+</span><span style="color:#75715e"></span>						<span style="color:#66d9ef">if</span>(loc_score<span style="color:#f92672">&lt;</span>min_loc_score){
+							min_loc_score<span style="color:#f92672">=</span>loc_score;
+							loc_server<span style="color:#f92672">=</span>j;
+							loc_node<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+						}
+					}
+				}
+			}
+			<span style="color:#66d9ef">if</span>(loc_server<span style="color:#f92672">!=-</span><span style="color:#ae81ff">1</span>){
+					<span style="color:#66d9ef">if</span>(time_<span style="color:#f92672">&gt;=</span>time_thresh)
+						<span style="color:#66d9ef">return</span> migrations;
+					time_<span style="color:#f92672">++</span>;
+					update_migrate_status(cur,loc_server,vm_id,loc_node);
+					<span style="color:#66d9ef">if</span>(loc_node<span style="color:#f92672">==-</span><span style="color:#ae81ff">1</span>){
+						migrations.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(vm_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,&#34;</span><span style="color:#f92672">+</span>to_string(myServer[loc_server].server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;)&#34;</span>);
+					}<span style="color:#66d9ef">else</span>{
+						<span style="color:#66d9ef">if</span>(loc_node<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>){
+							migrations.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(vm_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,&#34;</span><span style="color:#f92672">+</span>to_string(myServer[loc_server].server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,A)&#34;</span>);
+						}<span style="color:#66d9ef">else</span>{
+							migrations.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(vm_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,&#34;</span><span style="color:#f92672">+</span>to_string(myServer[loc_server].server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,B)&#34;</span>);
+						}
+					}
+					
+				}
+		}
+		<span style="color:#75715e">// double load_ratio=1.0-double(myServer[cur].A_left_cpu+myServer[cur].A_left_mem+myServer[cur].B_left_cpu+myServer[cur].B_left_mem)/(myServer[cur].cap_cpu+myServer[cur].cap_mem);
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// if(load_ratio&lt;0.5)
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// 	vis[cur]=1;
+</span><span style="color:#75715e"></span>	}
+	<span style="color:#66d9ef">return</span> migrations;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> migrate1(){
+	vector<span style="color:#f92672">&lt;</span>string<span style="color:#f92672">&gt;</span> migrations;
+	<span style="color:#66d9ef">if</span>(days<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>)
+		<span style="color:#66d9ef">return</span> migrations;
+	<span style="color:#66d9ef">int</span> time_<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+	<span style="color:#66d9ef">int</span> time_thresh<span style="color:#f92672">=</span>nov<span style="color:#f92672">/</span><span style="color:#ae81ff">100</span><span style="color:#f92672">*</span><span style="color:#ae81ff">3</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+	unordered_map<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span>mig_map;
+	vector<span style="color:#f92672">&lt;</span><span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> si;
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>myServer.size();i<span style="color:#f92672">++</span>){
+		si.push_back(i);
+	}
+	<span style="color:#75715e">//按负载率排序
+</span><span style="color:#75715e"></span>	sort(si.begin(),si.end(),[](<span style="color:#66d9ef">int</span> a,<span style="color:#66d9ef">int</span> b){
+		MyServer x<span style="color:#f92672">=</span>myServer[a];
+		MyServer y<span style="color:#f92672">=</span>myServer[b];
+		<span style="color:#66d9ef">double</span> thresh_x<span style="color:#f92672">=</span><span style="color:#66d9ef">double</span>(x.A_left_cpu<span style="color:#f92672">+</span>x.A_left_mem<span style="color:#f92672">+</span>x.B_left_cpu<span style="color:#f92672">+</span>x.B_left_mem)<span style="color:#f92672">/</span>(x.cap_cpu<span style="color:#f92672">+</span>x.cap_mem);
+		<span style="color:#66d9ef">double</span> thresh_y<span style="color:#f92672">=</span><span style="color:#66d9ef">double</span>(y.A_left_cpu<span style="color:#f92672">+</span>y.A_left_mem<span style="color:#f92672">+</span>y.B_left_cpu<span style="color:#f92672">+</span>y.B_left_mem)<span style="color:#f92672">/</span>(y.cap_cpu<span style="color:#f92672">+</span>y.cap_mem);
+		<span style="color:#66d9ef">return</span> thresh_x<span style="color:#f92672">&lt;</span>thresh_y;
+	});
+	<span style="color:#66d9ef">int</span> last<span style="color:#f92672">=</span>si.size()<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>;
+
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>si.size();i<span style="color:#f92672">++</span>){
+		<span style="color:#66d9ef">int</span> index<span style="color:#f92672">=</span>si[i];
+		vector<span style="color:#f92672">&lt;</span>pair<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">&gt;</span>id2nodes;
+		<span style="color:#66d9ef">double</span> load_ratio<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span><span style="color:#f92672">-</span><span style="color:#66d9ef">double</span>(myServer[index].A_left_cpu<span style="color:#f92672">+</span>myServer[index].A_left_mem<span style="color:#f92672">+</span>myServer[index].B_left_cpu<span style="color:#f92672">+</span>myServer[index].B_left_mem)<span style="color:#f92672">/</span>(myServer[index].cap_cpu<span style="color:#f92672">+</span>myServer[index].cap_mem);
+		<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> t<span style="color:#f92672">=</span>myServer[index].vmLocs.begin();t<span style="color:#f92672">!=</span>myServer[index].vmLocs.end();t<span style="color:#f92672">++</span>){
+			ll vm_id<span style="color:#f92672">=</span>t<span style="color:#f92672">-&gt;</span>first;
+			<span style="color:#66d9ef">int</span> node<span style="color:#f92672">=</span>t<span style="color:#f92672">-&gt;</span>second;
+			id2nodes.push_back(make_pair(vm_id,node));
+		}
+		<span style="color:#75715e">// if(load_ratio&lt;=0.5){
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// 	continue;
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">// }
+</span><span style="color:#75715e"></span>		<span style="color:#75715e">//虚拟机资源排序
+</span><span style="color:#75715e"></span>		sort(id2nodes.begin(),id2nodes.end(),[](pair<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> a,pair<span style="color:#f92672">&lt;</span>ll,<span style="color:#66d9ef">int</span><span style="color:#f92672">&gt;</span> b){
+			Vm vma<span style="color:#f92672">=</span>vms[get_vm[get_vm_byid[a.first]]];
+			Vm vmb<span style="color:#f92672">=</span>vms[get_vm[get_vm_byid[b.first]]];
+			<span style="color:#66d9ef">return</span> (vma.cpu<span style="color:#f92672">+</span>vmb.mem)<span style="color:#f92672">&lt;=</span>(vmb.cpu<span style="color:#f92672">+</span>vmb.mem);
+		});
+		<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">auto</span> id_node:id2nodes){
+			<span style="color:#66d9ef">bool</span> suc<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;
+			ll vm_id<span style="color:#f92672">=</span>id_node.first;
+			<span style="color:#66d9ef">int</span> node<span style="color:#f92672">=</span>id_node.second;
+			<span style="color:#66d9ef">if</span>(mig_map[vm_id]<span style="color:#f92672">==</span><span style="color:#ae81ff">1</span>)
+				<span style="color:#66d9ef">continue</span>;
+			<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> j<span style="color:#f92672">=</span>last;j<span style="color:#f92672">&gt;</span>i;j<span style="color:#f92672">--</span>){
+				<span style="color:#66d9ef">int</span> to_index<span style="color:#f92672">=</span>si[j];
+				<span style="color:#66d9ef">double</span> load_ratio<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span><span style="color:#f92672">-</span><span style="color:#66d9ef">double</span>(myServer[to_index].A_left_cpu<span style="color:#f92672">+</span>myServer[to_index].A_left_mem<span style="color:#f92672">+</span>myServer[to_index].B_left_cpu<span style="color:#f92672">+</span>myServer[to_index].B_left_mem)<span style="color:#f92672">/</span>(myServer[to_index].cap_cpu<span style="color:#f92672">+</span>myServer[to_index].cap_mem);
+				<span style="color:#66d9ef">if</span>(load_ratio<span style="color:#f92672">&gt;=</span><span style="color:#ae81ff">0.9</span>){
+					last<span style="color:#f92672">=</span>j;
+					<span style="color:#66d9ef">continue</span>;
+				}
+				<span style="color:#66d9ef">int</span> to_node<span style="color:#f92672">=</span>canput(vm_id,to_index);
+				<span style="color:#66d9ef">if</span>(to_node<span style="color:#f92672">!=-</span><span style="color:#ae81ff">2</span>){
+					suc<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+					mig_map[vm_id]<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>;
+					<span style="color:#66d9ef">if</span>(time_<span style="color:#f92672">&gt;=</span>time_thresh)
+						<span style="color:#66d9ef">return</span> migrations;
+					time_<span style="color:#f92672">++</span>;
+					update_migrate_status(index,to_index,vm_id,to_node);
+					<span style="color:#66d9ef">if</span>(to_node<span style="color:#f92672">==-</span><span style="color:#ae81ff">1</span>){
+						migrations.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(vm_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,&#34;</span><span style="color:#f92672">+</span>to_string(myServer[to_index].server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;)&#34;</span>);
+					}<span style="color:#66d9ef">else</span>{
+						<span style="color:#66d9ef">if</span>(to_node<span style="color:#f92672">==</span><span style="color:#ae81ff">0</span>){
+							migrations.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(vm_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,&#34;</span><span style="color:#f92672">+</span>to_string(myServer[to_index].server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,A)&#34;</span>);
+						}<span style="color:#66d9ef">else</span>{
+							migrations.push_back(<span style="color:#e6db74">&#34;(&#34;</span><span style="color:#f92672">+</span>to_string(vm_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,&#34;</span><span style="color:#f92672">+</span>to_string(myServer[to_index].server_id)<span style="color:#f92672">+</span><span style="color:#e6db74">&#34;,B)&#34;</span>);
+						}
+					}
+					<span style="color:#66d9ef">break</span>;
+				}
+			}
+			<span style="color:#66d9ef">if</span>(<span style="color:#f92672">!</span>suc)
+				<span style="color:#66d9ef">break</span>;
+		}
+	}
+	<span style="color:#66d9ef">return</span> migrations;
+}
+
+<span style="color:#66d9ef">int</span> main(){
+	input_serverandvm();
+	<span style="color:#66d9ef">int</span> t,k;
+	cin<span style="color:#f92672">&gt;&gt;</span>t<span style="color:#f92672">&gt;&gt;</span>k;
+	<span style="color:#75715e">//cout&lt;&lt;&#34;t:&#34;&lt;&lt;t&lt;&lt;&#34;k:&#34;&lt;&lt;k&lt;&lt;endl;
+</span><span style="color:#75715e"></span>	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>k;i<span style="color:#f92672">++</span>){
+		<span style="color:#66d9ef">auto</span> ops<span style="color:#f92672">=</span>readOp();
+		reqQ.push_back(ops);
+	}
+	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>;i<span style="color:#f92672">&lt;</span>t;i<span style="color:#f92672">++</span>){
+		vector<span style="color:#f92672">&lt;</span>Req<span style="color:#f92672">&gt;</span> ops;
+		<span style="color:#75715e">//transfer-todo
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">auto</span> migrations<span style="color:#f92672">=</span>migrate(t);
+		<span style="color:#75715e">//扩容 并 放置虚拟机
+</span><span style="color:#75715e"></span>		<span style="color:#66d9ef">auto</span> output<span style="color:#f92672">=</span>processRequest(reqQ,t);
+		<span style="color:#75715e">//输出
+</span><span style="color:#75715e"></span>		printInfo(migrations,output);
+		<span style="color:#66d9ef">if</span>(i<span style="color:#f92672">&lt;</span>t<span style="color:#f92672">-</span>k)
+			ops<span style="color:#f92672">=</span>readOp();
+		<span style="color:#66d9ef">if</span>(ops.size()<span style="color:#f92672">!=</span><span style="color:#ae81ff">0</span>)
+		reqQ.push_back(ops);
+	}
+}
+</code></pre></div><p>几个优化比较大的点:</p>
+<p>1、best fit放置虚拟机。<br>
+2、购买时考虑当前请求之后的一些请求。我们讨论这个方法的玄学点在于购买时后面的虚拟机都能够塞进该服务器内，在结合购买数量和购买成本及使用成本选出价格最优的服务器。<br>
+3、迁移时候按照服务器的负载率排序，然后低负载尽量向高负载迁移。上述代码的迁移是将服务器内的虚拟机模拟add请求进行迁移。</p>
+
+  </div>
+
+  <footer>
+    <hr class="end-line">
+
+    
+
+    
+
+    
+    
+  </footer>
+
+  <div class="comments">
+
+
+
+</div>
+
+</article>
+
+
+</body>
+<div class="foot">
+  
+  
+    &copy; 2019 - 2021 &#183; 
+    <a href="/">Home</a> · Theme <a href="https://github.com/RainerChiang/simpleness">Simpleness</a> Powered by <a href="https://gohugo.io/">Hugo</a> &#183;
+    <a href="#"><i class="fas fa-chevron-up"></i></a>
+  
+
+  
+</div>
+
+<script src="/js/lazyload.min.js"></script>
+<script>
+  var lazyImage = new LazyLoad({
+    container: document.getElementById('article')
+  });
+</script>
+
+
+</html>

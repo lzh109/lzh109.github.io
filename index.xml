@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Hugo</title>
+    <link>http://example.org/</link>
+    <description>Recent content on Hugo</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <copyright>[Home](/) &amp;#183; Theme [Simpleness](https://github.com/RainerChiang/simpleness) Powered by [Hugo](https://gohugo.io/)</copyright>
+    <lastBuildDate>Tue, 13 Apr 2021 09:16:39 +0800</lastBuildDate><atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>About</title>
+      <link>http://example.org/about/</link>
+      <pubDate>Tue, 13 Apr 2021 09:43:34 +0800</pubDate>
+      
+      <guid>http://example.org/about/</guid>
+      <description>hello world!</description>
+    </item>
+    
+    <item>
+      <title>华为软挑2021</title>
+      <link>http://example.org/posts/hw/</link>
+      <pubDate>Tue, 13 Apr 2021 09:16:39 +0800</pubDate>
+      
+      <guid>http://example.org/posts/hw/</guid>
+      <description>华为2021软件挑战正式赛在都江堰青城山尊酒店落下帷幕，stopAc最后取得了成渝赛区第八名的成绩。每个赛区的前四名才有资格去深圳进行全球总决赛，这也意味着我们的比赛之旅到此就结束了。虽然没能进总决赛，但我们的目标(赛区前10)还是实现了，也算是不错的结局吧！
+这场比赛其实对我来说意义蛮大的。第一次写了超500行的代码，第一次在比赛中贡献了两个有效的优化点，第一次拿了这么好的名次，学生生涯最后一场比赛，第一次体会到全力以赴的快感，第一次觉得自己还行哈哈。
+真的很感谢两位超给力的队友，我也只想说一句达神yyds，裕神yyds！一个算法能力、学习能力、理解能力超强。一个代码能力、逻辑能力无敌。马上就要分别了，真的很期待下次还可以一起并肩作战，如果有这样的机会的话。
+感慨完毕，说一下这次的比赛吧。
+题目的背景是你是一家提供云服务的厂商，在满足用户需求的情况下，从购买和使用两个方面最大程度的节约成本。首先会给出可以购买的所有服务器，作为承载虚拟机的容器，每个服务器都有不同的cpu和ram,以及购买成本和使用成本。使用成本即服务器满载一天所消耗的电力成本。之后会给出用户可能请求的所有虚拟机类型，每个虚拟机都有不同的cpu和ram。除此之外，每个虚拟机还定义了其单、双节点部署类型。每个服务器都有A、B两个节点，每个节点的资源相同。单节点虚拟机可以任意部署到其中一个节点，双节点必须同时部署到A和B两个节点。接下来的几天会不断接收用户请求，请求总共有两种类型，一种是add,意味着你要将该种类型的虚拟机部署到当前所拥有的服务器中。另一种是del，即将之前部署的虚拟机在服务器中释放掉。我们一次只能知道k天的所有请求，我们的目标是基于这些请求，通过服务器购买策略和虚拟机部署策略以及虚拟机迁移策略，使最后的总成本最低。总成本即购买服务器消耗的硬件成本和服务器的使用成本。迁移策略的意思是在每天处理请求之前，我们可以将当前服务器中的虚拟机进行迁移。
+先放一下代码
+#include&amp;lt;iostream&amp;gt;#include&amp;lt;string&amp;gt;#include&amp;lt;unordered_map&amp;gt;#include&amp;lt;vector&amp;gt;#include&amp;lt;stdlib.h&amp;gt;#include&amp;lt;queue&amp;gt;#include&amp;lt;algorithm&amp;gt;using namespace std; typedef long long ll; typedef struct A{ string name; int cpu; int mem; ll hardware_cost; ll energy_cost; }Server; typedef struct B{ string name; int cpu; int mem; int is_double_node; }Vm; typedef struct C{ string name; string vm_name; ll vm_id; }Req; typedef struct E{ unordered_map&amp;lt;ll,int&amp;gt; vmLocs; string name; int cap_cpu; int cap_mem; int A_left_cpu; int A_left_mem; int B_left_cpu; int B_left_mem; int score; int server_id; void set_id(int x){ server_id=x; } }MyServer; unordered_map&amp;lt;string,int&amp;gt; get_vm;//得到vms的下标 unordered_map&amp;lt;ll,string&amp;gt;get_vm_byid; unordered_map&amp;lt;string,int&amp;gt; get_server;//得到servers的下标 unordered_map&amp;lt;ll,int&amp;gt; get_loc;//根据vm_id找到虚拟机配置信息 vector&amp;lt;MyServer&amp;gt; myServer;//购买的服务器列表 vector&amp;lt;Server&amp;gt;servers; vector&amp;lt;Server&amp;gt;servers_sort; vector&amp;lt;Vm&amp;gt;vms; unordered_map&amp;lt;int,int&amp;gt;need_migrate; void input_serverandvm(){ int n; cin&amp;gt;&amp;gt;n; string line; getline(cin,line); for(int i=0;i&amp;lt;n;i++){ getline(cin,line); //cout&amp;lt;&amp;lt;line; 	//cout&amp;lt;&amp;lt;&amp;#34;read data done&amp;#34;&amp;lt;&amp;lt;to_string(i)&amp;lt;&amp;lt;endl; 	string pre=&amp;#34;&amp;#34;; string ans[5]; int k=0; for(int j=1;j&amp;lt;line.</description>
+    </item>
+    
+  </channel>
+</rss>
