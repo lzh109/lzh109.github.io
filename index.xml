@@ -2,27 +2,27 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Hugo</title>
-    <link>http://example.org/</link>
+    <link>https://github.com/lzh109/lzh109.github.io/</link>
     <description>Recent content on Hugo</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <copyright>[Home](/) &amp;#183; Theme [Simpleness](https://github.com/RainerChiang/simpleness) Powered by [Hugo](https://gohugo.io/)</copyright>
-    <lastBuildDate>Tue, 13 Apr 2021 09:16:39 +0800</lastBuildDate><atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 13 Apr 2021 09:16:39 +0800</lastBuildDate><atom:link href="https://github.com/lzh109/lzh109.github.io/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>About</title>
-      <link>http://example.org/about/</link>
+      <link>https://github.com/lzh109/lzh109.github.io/about/</link>
       <pubDate>Tue, 13 Apr 2021 09:43:34 +0800</pubDate>
       
-      <guid>http://example.org/about/</guid>
+      <guid>https://github.com/lzh109/lzh109.github.io/about/</guid>
       <description>hello world!</description>
     </item>
     
     <item>
       <title>华为软挑2021</title>
-      <link>http://example.org/posts/hw/</link>
+      <link>https://github.com/lzh109/lzh109.github.io/posts/hw/</link>
       <pubDate>Tue, 13 Apr 2021 09:16:39 +0800</pubDate>
       
-      <guid>http://example.org/posts/hw/</guid>
+      <guid>https://github.com/lzh109/lzh109.github.io/posts/hw/</guid>
       <description>华为2021软件挑战正式赛在都江堰青城山尊酒店落下帷幕，stopAc最后取得了成渝赛区第八名的成绩。每个赛区的前四名才有资格去深圳进行全球总决赛，这也意味着我们的比赛之旅到此就结束了。虽然没能进总决赛，但我们的目标(赛区前10)还是实现了，也算是不错的结局吧！
 这场比赛其实对我来说意义蛮大的。第一次写了超500行的代码，第一次在比赛中贡献了两个有效的优化点，第一次拿了这么好的名次，学生生涯最后一场比赛，第一次体会到全力以赴的快感，第一次觉得自己还行哈哈。
 真的很感谢两位超给力的队友，我也只想说一句达神yyds，裕神yyds！一个算法能力、学习能力、理解能力超强。一个代码能力、逻辑能力无敌。马上就要分别了，真的很期待下次还可以一起并肩作战，如果有这样的机会的话。
